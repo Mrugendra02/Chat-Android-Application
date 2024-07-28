@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Chit Chat</string>
+    <string name="register_with_us">Register with us 😀</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="register_now">Register now!</string>
+    <string name="login_now">Login now</string>
+    <string name="auth_recovery">Registration successful. This is your authentication number. Keep it safe and use it for account recovery and authentication</string>
+    <string name="go_to_chats">Authenticate</string>
+    <string name="username_exist_choose_different">Username exist choose different</string>
+    <string name="authetication">Authetication</string>
+    <string name="otp_athentication">OTP Athentication</string>
+    <string name="username_does_not_exits">Username does not exits</string>
+    <string name="wrong_password">Wrong Password</string>
+    <string name="otp">Put the authentication code given while registering to verify and login</string>
+    <string name="chats">Chats</string>
+    <string name="starting_chitchat">Starting ChitChat</string>
+    <string name="welcome">Welcome</string>
+    <string name="logout">Logout</string>
+    <string name="insert_the_details">Insert the details</string>
+    <string name="new_password">New Password</string>
+    <string name="authentication_id">Authentication Id</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="password_successfully_reset_login_back">Password Successfully reset Login back</string>
+    <string name="unable_to_success_the_password">Unable to success the password</string>
+    <string name="select_friend">Select Friend</string>
+    <string name="username_cannot_be_empty">Username cannot be empty</string>
+    <string name="password_cannot_be_empty">Password cannot be empty</string>
+    <string name="my_messages_default">My Messages Default</string>
+    <string name="profile_info">Profile info</string>
+    <string name="reload_chat">Reload chat</string>
+</resources>
