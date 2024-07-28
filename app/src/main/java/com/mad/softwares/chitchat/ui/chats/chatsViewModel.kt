@@ -1,6 +1,7 @@
 package com.mad.softwares.chitchat.ui.chats
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mad.softwares.chitchat.data.Chats
@@ -20,6 +21,7 @@ val TAGchat = "ChatsViewModel"
 val TAGaddChat = "AddChatsViewModel"
 
 class ChatsViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val dataRepository: DataRepository,
 ) : ViewModel() {
     var chatsUiState = MutableStateFlow(ChatsUiState())
@@ -28,6 +30,7 @@ class ChatsViewModel(
     init {
         getChats()
         Log.d(TAGchat,"init called here .......")
+        Log.d(TAGchat,"To Reload chat : ${savedStateHandle.get<Boolean>(chatsScreenDestination.toReloadChats)}")
     }
 
     private fun getCurrentUserData() {

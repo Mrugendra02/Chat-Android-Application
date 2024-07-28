@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     ApplicationScreen(
                         navController = rememberNavController(),
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = chatsScreenDestination
+                        startDestination = chatsScreenDestination.routeWithReload
                     )
                 }
             }
@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                     ApplicationScreen(
                         navController = rememberNavController(),
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = welcomeDestination
+                        startDestination = welcomeDestination.route
                     )
                 }
             }

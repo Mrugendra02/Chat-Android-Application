@@ -53,6 +53,7 @@ object addChatDestination : destinationData {
 fun AddChat(
     navigateUp: () -> Unit,
     viewModel: AddChatViewModel = viewModel(factory = GodViewModelProvider.Factory),
+    navigateWithReload: (Boolean) -> Unit,
 //    viewModel: ChatsViewModel
 //    jugadViewModel:chatsViewModel = viewModel(factory = GodViewModelProvider.Factory)
 ) {
@@ -60,7 +61,8 @@ fun AddChat(
     if (uiState.addChatSuccess){
 //        jugadViewModel.getChats(true)
 //        viewModel.getChats(isForced = true)
-        navigateUp()
+//        navigateUp()
+        navigateWithReload(true)
     }
     AddChatBody(
         navigateUp = navigateUp,

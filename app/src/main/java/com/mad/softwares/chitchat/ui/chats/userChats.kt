@@ -58,6 +58,8 @@ object chatsScreenDestination : destinationData {
     override val route = "chats"
     override val title = R.string.chats
     override val canBack = false
+    val toReloadChats = "reloadStatus"
+    val routeWithReload = "$route/{$toReloadChats}"
 }
 
 @Composable

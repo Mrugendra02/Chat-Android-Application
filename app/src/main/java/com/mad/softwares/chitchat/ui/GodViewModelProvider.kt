@@ -20,7 +20,8 @@ object GodViewModelProvider {
 
         initializer {
             ChatsViewModel(
-                myApplication().container.dataRepository
+                dataRepository = myApplication().container.dataRepository,
+                savedStateHandle = this.createSavedStateHandle(),
             )
         }
 

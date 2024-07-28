@@ -41,12 +41,12 @@ val TAGnav = "navLog"
 @Composable
 fun ApplicationScreen(
     navController: NavHostController,
-    startDestination: destinationData,
+    startDestination: String,
     modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination.route,
+        startDestination = startDestination,
         modifier = modifier
     ) {
         composable(loginScreenDestination.route) {
@@ -93,7 +93,13 @@ fun ApplicationScreen(
             )
         }
 
-        composable(chatsScreenDestination.route) {
+        composable(
+            route = chatsScreenDestination.routeWithReload,
+            arguments = listOf(navArgument(chatsScreenDestination.toReloadChats){
+                type = NavType.BoolType
+                defaultValue = false
+            })
+        ) {
 //            Log.d(TAGnav,"chats : ${addChatDestination.routeWithArgs()}")
             UserChats(
 
@@ -119,7 +125,12 @@ fun ApplicationScreen(
         )
         {
             AddChat(
-                navigateUp = {navController.popBackStack(chatsScreenDestination.route,false)}
+                navigateUp = {navController.popBackStack(chatsScreenDestination.routeWithReload,false)},
+                navigateWithReload = {
+                    navController.navigate("${chatsScreenDestination.route}/$it"){
+                        popUpTo(0)
+                    }
+                }
             )
         }
 
