@@ -167,84 +167,15 @@ class ChatsViewModel(
         }
     }
 
-//    fun getMembers(): List<String> {
-//        Log.d(
-//            TAGchat,
-//            "members : ${chatsUiState.value.chats.map { it.chatName } + chatsUiState.value.currentUser.username}"
-//        )
-//        return chatsUiState.value.chats.map { it.chatName } + chatsUiState.value.currentUser.username
-//    }
-
-    var addChatUiState = MutableStateFlow(AddChatUiState())
-        private set
-    fun getMembers() {
-        Log.d(TAGaddChat, "getMembers called")
-        addChatUiState.update { it.copy(
-            isLoading = true,
-            members = chatsUiState.value.chats.map { it.chatName } + chatsUiState.value.currentUser.username
-        ) }
-        viewModelScope.launch {
-            try {
-                val users =
-                    async { dataRepository.getAllTheUsers(members = addChatUiState.value.members) }
-                addChatUiState.update {
-                    it.copy(
-                        chatUsers = users.await(),
-                        isLoading = false
-                    )
-                }
-                Log.d(TAGaddChat, "Members are loaded Successfully")
-            } catch (e: Exception) {
-                Log.e(TAGaddChat, "Unable to get the members : $e")
-                addChatUiState.update {
-                    it.copy(
-                        isError = true,
-                        errorMessage = e.message.toString(),
-                        isLoading = false
-                    )
-                }
-            }
-        }
+    fun getMembers(): List<String> {
+        Log.d(
+            TAGchat,
+            "members : ${chatsUiState.value.chats.map { it.chatName } + chatsUiState.value.currentUser.username}"
+        )
+        return chatsUiState.value.chats.map { it.chatName } + chatsUiState.value.currentUser.username
     }
 
-    private fun generateSixDigitUUID(n: Int): String {
-        val randomUUID = UUID.randomUUID()
-        val hashCode = Math.abs(randomUUID.hashCode()).toString()
-        return hashCode.take(n).padStart(6, '0')
-    }
-
-    fun addSingleChat(
-        secondMember: String
-    ) {
-        Log.d(TAGaddChat, "addSingleChat called")
-        addChatUiState.update { it.copy(isLoading = true) }
-        viewModelScope.launch {
-            try {
-                dataRepository.addChatToDatabase(
-                    currentUser = dataRepository.getCurrentUser(),
-                    memberUsers = listOf(secondMember),
-                    chatName = generateSixDigitUUID(6),
-                    chatId = generateSixDigitUUID(8),
-                    profilePhoto = "",
-                    isGroup = false
-                )
-                addChatUiState.update {
-                    it.copy(
-                        addChatSuccess = true,
-                        isLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAGaddChat, "Unable to add chat : $e")
-                addChatUiState.update {
-                    it.copy(
-                        isError = true,
-                        isLoading = false,
-                        errorMessage = e.message.toString())
-                }
-            }
-        }
-    }
+//
 }
 
 data class ChatsUiState(
@@ -260,14 +191,7 @@ data class ChatsUiState(
 //    val logoutSuccess: Boolean = false
 )
 
-data class AddChatUiState(
-    val members: List<String> = listOf(),
-    val chatUsers: List<chatUser> = listOf(),
-    val isLoading: Boolean = false,
-    val isError: Boolean = false,
-    val errorMessage: String = "",
-    val addChatSuccess:Boolean = false
-)
+
 
 enum class CurrentChatStatus() {
     Loading,

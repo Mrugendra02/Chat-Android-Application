@@ -43,23 +43,23 @@ object addChatDestination : destinationData {
 //    val memberString = members?.joinToString(",") ?: ""
 //
 //    //    val routeWithArgs = "$route/${memberString}"
-//    fun routeWithArgs(members: List<String>): String {
-//        val membersString = members.joinToString(",")
-//        return "$route/$membersString"
-//    }
+    fun routeWithArgs(members: List<String>): String {
+        val membersString = members.joinToString(",")
+        return "$route/$membersString"
+    }
 }
 
 @Composable
 fun AddChat(
     navigateUp: () -> Unit,
-//    viewModel: ChatsViewModel = viewModel(factory = GodViewModelProvider.Factory),
-    viewModel: ChatsViewModel
+    viewModel: AddChatViewModel = viewModel(factory = GodViewModelProvider.Factory),
+//    viewModel: ChatsViewModel
 //    jugadViewModel:chatsViewModel = viewModel(factory = GodViewModelProvider.Factory)
 ) {
     val uiState = viewModel.addChatUiState.collectAsState().value
     if (uiState.addChatSuccess){
 //        jugadViewModel.getChats(true)
-        viewModel.getChats(isForced = true)
+//        viewModel.getChats(isForced = true)
         navigateUp()
     }
     AddChatBody(

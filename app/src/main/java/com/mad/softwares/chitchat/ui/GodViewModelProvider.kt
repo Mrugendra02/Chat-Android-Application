@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.mad.softwares.chitchat.MyApplication
+import com.mad.softwares.chitchat.ui.chats.AddChatViewModel
 import com.mad.softwares.chitchat.ui.chats.ChatsViewModel
 import com.mad.softwares.chitchat.ui.welcome.welcomeViewModel
 
@@ -23,12 +24,12 @@ object GodViewModelProvider {
             )
         }
 
-//        initializer {
-//            addChatViewModel(
-//                savedStateHandle = this.createSavedStateHandle(),
-//                dataRepository = myApplication().container.dataRepository
-//            )
-//        }
+        initializer {
+            AddChatViewModel(
+                savedStateHandle = this.createSavedStateHandle(),
+                dataRepository = myApplication().container.dataRepository
+            )
+        }
     }
 }
 

@@ -62,9 +62,9 @@ object chatsScreenDestination : destinationData {
 
 @Composable
 fun UserChats(
-//    viewModel: ChatsViewModel = viewModel(factory = GodViewModelProvider.Factory),
-    viewModel: ChatsViewModel,
-    navitageToAddChats: () -> Unit,
+    viewModel: ChatsViewModel = viewModel(factory = GodViewModelProvider.Factory),
+//    viewModel: ChatsViewModel,
+    navitageToAddChats: (List<String>) -> Unit,
     navigateToWelcome:()->Unit
 ) {
 
@@ -76,7 +76,7 @@ fun UserChats(
                 chatsUiState = chatsUiState,
                 navigateToCurrentChat = {},
                 isCardEnabled = true,
-                navigateToAddChats = { navitageToAddChats() },
+                navigateToAddChats = { navitageToAddChats(viewModel.getMembers()) },
                 logOut = { viewModel.logoutUser() }
             )
         }

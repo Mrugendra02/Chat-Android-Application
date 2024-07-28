@@ -1,5 +1,6 @@
 package com.mad.softwares.chitchat.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,11 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.mad.softwares.chitchat.R
-import com.mad.softwares.chitchat.ui.chats.ChatsNavGraph
-import com.mad.softwares.chitchat.ui.chats.ChatsNavGraphDestinationData
+import com.mad.softwares.chitchat.ui.chats.AddChat
+//import com.mad.softwares.chitchat.ui.chats.ChatsNavGraph
+//import com.mad.softwares.chitchat.ui.chats.ChatsNavGraphDestinationData
+import com.mad.softwares.chitchat.ui.chats.UserChats
+import com.mad.softwares.chitchat.ui.chats.addChatDestination
+import com.mad.softwares.chitchat.ui.chats.chatsScreenDestination
 import com.mad.softwares.chitchat.ui.theme.ChitChatTheme
 import com.mad.softwares.chitchat.ui.welcome.LoginScreen
 import com.mad.softwares.chitchat.ui.welcome.SignUpScreen
@@ -55,7 +62,7 @@ fun ApplicationScreen(
 //                    navController.navigate(chatsScreenDestination.route) {
 //                        popUpTo(0)
 //                    }
-                    navController.navigate(ChatsNavGraphDestinationData.route){
+                    navController.navigate(chatsScreenDestination.route){
                         popUpTo(0)
                     }
                 }
@@ -69,7 +76,7 @@ fun ApplicationScreen(
 //                    navController.navigate(chatsScreenDestination.route) {
 //                        popUpTo(0)
 //                    }
-                    navController.navigate(ChatsNavGraphDestinationData.route){
+                    navController.navigate(chatsScreenDestination.route){
                         popUpTo(0)
                     }
                 }
@@ -86,33 +93,39 @@ fun ApplicationScreen(
             )
         }
 
-//        composable(chatsScreenDestination.route) {
-////            Log.d(TAGnav,"chats : ${addChatDestination.routeWithArgs()}")
-//            UserChats(
-//
-//                navitageToAddChats = {
-//                    Log.d(TAGnav,"chats : ${addChatDestination.route}")
-//                    navController.navigate(addChatDestination.route) },
-//                navigateToWelcome = {
-//                    navController.navigate(welcomeDestination.route) {
-//                        popUpTo(0)
-//                    }
-//                }
-//            )
-//        }
-//
-//        composable(
-//            route = addChatDestination.route
-//        )
-//        {
-//            AddChat(
-//                navigateUp = {navController.popBackStack(chatsScreenDestination.route,false)}
-//            )
-//        }
+        composable(chatsScreenDestination.route) {
+//            Log.d(TAGnav,"chats : ${addChatDestination.routeWithArgs()}")
+            UserChats(
 
-        composable(ChatsNavGraphDestinationData.route){
-            ChatsNavGraph(navController)
+                navitageToAddChats = {
+                    Log.d(TAGnav,"chats : ${addChatDestination.routeWithArgs(it)}")
+                    navController.navigate(addChatDestination.routeWithArgs(it)) },
+                navigateToWelcome = {
+                    navController.navigate(welcomeDestination.route) {
+                        popUpTo(0)
+                    }
+                }
+            )
         }
+
+        composable(
+            route = "${addChatDestination.route}/{members}",
+            arguments = listOf(
+                navArgument("members") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        )
+        {
+            AddChat(
+                navigateUp = {navController.popBackStack(chatsScreenDestination.route,false)}
+            )
+        }
+
+//        composable(ChatsNavGraphDestinationData.route){
+//            ChatsNavGraph(navController)
+//        }
     }
 }
 
