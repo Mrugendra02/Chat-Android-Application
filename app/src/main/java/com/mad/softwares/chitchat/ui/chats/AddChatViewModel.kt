@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+val TAGaddChat = "AddChatsViewModel"
+
+
 class AddChatViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val dataRepository: DataRepository
@@ -39,7 +42,7 @@ class AddChatViewModel(
         addChatUiState.update {
             it.copy(
                 isLoading = true,
-//                members = chatsUiState.value.chats.map { it.chatName } + chatsUiState.value.currentUser.username
+//                members = chatsUiState.value.chats.map { it.chatID } + chatsUiState.value.currentUser.username
             )
         }
         viewModelScope.launch {

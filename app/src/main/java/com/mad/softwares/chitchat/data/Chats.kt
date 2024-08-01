@@ -7,6 +7,7 @@ data class Chats(
     val chatName:String = "",
     val isGroup:Boolean = false,
     val members:List<String> = listOf(),
+    val chatPic:String = "",
     val membersData:MutableList<chatUser> = mutableListOf(),
     val lastMessage:lastMessage = lastMessage(timestamp = Timestamp(0,0))
 )

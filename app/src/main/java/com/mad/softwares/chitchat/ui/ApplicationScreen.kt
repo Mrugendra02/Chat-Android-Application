@@ -23,11 +23,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.mad.softwares.chitchat.R
 import com.mad.softwares.chitchat.ui.chats.AddChat
-//import com.mad.softwares.chitchat.ui.chats.ChatsNavGraph
-//import com.mad.softwares.chitchat.ui.chats.ChatsNavGraphDestinationData
 import com.mad.softwares.chitchat.ui.chats.UserChats
 import com.mad.softwares.chitchat.ui.chats.addChatDestination
 import com.mad.softwares.chitchat.ui.chats.chatsScreenDestination
+import com.mad.softwares.chitchat.ui.messages.Messages
 import com.mad.softwares.chitchat.ui.theme.ChitChatTheme
 import com.mad.softwares.chitchat.ui.welcome.LoginScreen
 import com.mad.softwares.chitchat.ui.welcome.SignUpScreen
@@ -35,6 +34,7 @@ import com.mad.softwares.chitchat.ui.welcome.loginScreenDestination
 import com.mad.softwares.chitchat.ui.welcome.signupScreenDestination
 import com.mad.softwares.chitchat.ui.welcome.welcomeDestination
 import com.mad.softwares.chitchat.ui.welcome.WelcomeScreen
+import com.mad.softwares.chitchat.ui.messages.messagesdestinationData
 
 val TAGnav = "navLog"
 
@@ -62,7 +62,7 @@ fun ApplicationScreen(
 //                    navController.navigate(chatsScreenDestination.route) {
 //                        popUpTo(0)
 //                    }
-                    navController.navigate(chatsScreenDestination.route){
+                    navController.navigate("${chatsScreenDestination.route}/${false}"){
                         popUpTo(0)
                     }
                 }
@@ -76,7 +76,7 @@ fun ApplicationScreen(
 //                    navController.navigate(chatsScreenDestination.route) {
 //                        popUpTo(0)
 //                    }
-                    navController.navigate(chatsScreenDestination.route){
+                    navController.navigate("${chatsScreenDestination.route}/${false}"){
                         popUpTo(0)
                     }
                 }
@@ -110,6 +110,9 @@ fun ApplicationScreen(
                     navController.navigate(welcomeDestination.route) {
                         popUpTo(0)
                     }
+                },
+                navigateToCurrentChat = {
+                    navController.navigate("${messagesdestinationData.route}/${it}")
                 }
             )
         }
@@ -137,6 +140,20 @@ fun ApplicationScreen(
 //        composable(ChatsNavGraphDestinationData.route){
 //            ChatsNavGraph(navController)
 //        }
+
+        composable(
+            route = messagesdestinationData.routeWithArgs,
+            arguments = listOf(
+                navArgument(messagesdestinationData.chatIDAndUsername){
+                    type= NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ){
+            Messages(
+                navigateUp = {navController.navigateUp()}
+            )
+        }
     }
 }
 

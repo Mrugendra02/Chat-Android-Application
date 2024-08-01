@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 val TAGchat = "ChatsViewModel"
-val TAGaddChat = "AddChatsViewModel"
+//val TAGaddChat = "AddChatsViewModel"
 
 class ChatsViewModel(
     private val savedStateHandle: SavedStateHandle,
@@ -103,6 +103,9 @@ class ChatsViewModel(
                 chatsUiState.update {
                     it.copy(
                         currentUser = user,
+                        isError = false,
+                        errorMessage = "",
+                        currentChatStatus = CurrentChatStatus.Loading
 //                        isLoading = false,
 //                        currentChatStatus = CurrentChatStatus.Success
                     )

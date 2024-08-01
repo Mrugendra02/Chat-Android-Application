@@ -6,6 +6,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.firestore
+import com.mad.softwares.chitchat.data.Chats
+import com.mad.softwares.chitchat.data.ContentType
+import com.mad.softwares.chitchat.data.MessageReceived
 import com.mad.softwares.chitchat.data.NetworkDataRepository
 import com.mad.softwares.chitchat.data.User
 import com.mad.softwares.chitchat.network.AuthenticationApi
@@ -17,6 +20,7 @@ import com.mad.softwares.chitchat.network.service
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -63,14 +67,14 @@ class ExampleInstrumentedTest {
         }
     }
 
-    private lateinit var firebaseApi:NetworkFirebaseApi
-    private lateinit var authApi:AuthenticationApi
-    private lateinit var authenticator:FirebaseAuth
+    private lateinit var firebaseApi: NetworkFirebaseApi
+    private lateinit var authApi: AuthenticationApi
+    private lateinit var authenticator: FirebaseAuth
     private lateinit var dataRepository: NetworkDataRepository
     var authState: FirebaseUser? = null
 
     @Before
-    fun initApi(){
+    fun initApi() {
         val db = com.google.firebase.Firebase.firestore
         firebaseApi = NetworkFirebaseApi(
             com.google.firebase.Firebase.firestore,
@@ -87,11 +91,13 @@ class ExampleInstrumentedTest {
             authServie = authApi
         )
 
+        runBlocking { authApi.loginUser(email = "good@456.com", password = "123456", status = {}) }
     }
 
     @After
-    fun tearDown(){
+    fun tearDown() {
         authenticator.currentUser?.getIdToken(false)
+        runBlocking { authApi.logoutUser { } }
     }
 
 //    fun status(status:FirebaseUser): FirebaseUser {
@@ -102,13 +108,13 @@ class ExampleInstrumentedTest {
     @Test
     @Throws(Exception::class)
     fun authApi_signupUser_returnSuccess() =
-        runTest{
+        runTest {
 //            lateinit var user:FirebaseUser
-            Log.d("Authentication","Starting test...")
+            Log.d("Authentication", "Starting test...")
             val statusDeferred = CompletableDeferred<String>()
 
             val email = "mruge@123.com"
-            val currentUser: Deferred<FirebaseUser?> = async{
+            val currentUser: Deferred<FirebaseUser?> = async {
                 authApi.signUpUser(
                     email = email,
                     password = "12345678",
@@ -121,9 +127,9 @@ class ExampleInstrumentedTest {
 //            }
             val status = statusDeferred.await()
             assertNotNull(currentUser.await()?.email)
-            assertEquals(email,currentUser.await()?.email)
+            assertEquals(email, currentUser.await()?.email)
 //            assertEquals("abcf@123.com",authenticator.currentUser?.email)
-            assertEquals("success",status)
+            assertEquals("success", status)
 
             Log.d("Authentication", "User is for test: ${authenticator.currentUser?.email}")
 
@@ -134,11 +140,11 @@ class ExampleInstrumentedTest {
     @Throws
     fun authApi_signInUser_returnSuccess() =
         runTest {
-            Log.d("Authentication","Starting login test...")
+            Log.d("Authentication", "Starting login test...")
             val statusDeferred = CompletableDeferred<String>()
 
             val email = "mruge@123.com"
-            val currentUser: Deferred<FirebaseUser?> = async{
+            val currentUser: Deferred<FirebaseUser?> = async {
                 authApi.loginUser(
                     email = email,
                     password = "12345678",
@@ -151,9 +157,9 @@ class ExampleInstrumentedTest {
 //            }
             val status = statusDeferred.await()
             assertNotNull(currentUser.await()?.email)
-            assertEquals(email,currentUser.await()?.email)
+            assertEquals(email, currentUser.await()?.email)
 //            assertEquals("abcf@123.com",authenticator.currentUser?.email)
-            assertEquals("success",status)
+            assertEquals("success", status)
         }
 
 
@@ -169,12 +175,15 @@ class ExampleInstrumentedTest {
                 docId = "iopj123ouihn"
             )
 
-            val backendUser:Deferred<User> =
-               async { firebaseApi.registerUserToDatabase(currUser = addingUser,
-                   docId = addingUser.docId
-               ) }
+            val backendUser: Deferred<User> =
+                async {
+                    firebaseApi.registerUserToDatabase(
+                        currUser = addingUser,
+                        docId = addingUser.docId
+                    )
+                }
 
-            assertEquals(addingUser.docId,backendUser.await().docId)
+            assertEquals(addingUser.docId, backendUser.await().docId)
         }
 
     @Test
@@ -189,7 +198,7 @@ class ExampleInstrumentedTest {
                 docId = "iopj123ouihn"
             )
 
-            val backendUser:Deferred<User> =
+            val backendUser: Deferred<User> =
                 async {
                     firebaseApi.loginAndUpdateUserToDatabase(
                         currUser = loginUser,
@@ -197,7 +206,7 @@ class ExampleInstrumentedTest {
                         docId = loginUser.docId
                     )
                 }
-            assertEquals(loginUser.docId,backendUser.await().docId)
+            assertEquals(loginUser.docId, backendUser.await().docId)
         }
 
 
@@ -213,7 +222,7 @@ class ExampleInstrumentedTest {
                 docId = "iopj123ouihn"
             )
 
-            val backendUser:Deferred<User> =
+            val backendUser: Deferred<User> =
                 async {
                     dataRepository.registerUser(
                         user = newUser,
@@ -221,7 +230,7 @@ class ExampleInstrumentedTest {
                     )
                 }
 
-            assertEquals(newUser.username,backendUser.await().username)
+            assertEquals(newUser.username, backendUser.await().username)
         }
 
     @Test
@@ -235,7 +244,7 @@ class ExampleInstrumentedTest {
                 username = "test@123.com",
                 docId = "iopj123ouihn"
             )
-            val backendUser:Deferred<User> =
+            val backendUser: Deferred<User> =
                 async {
                     dataRepository.loginUser(
                         user = loginUser,
@@ -243,19 +252,106 @@ class ExampleInstrumentedTest {
                     )
                 }
 
-            assertEquals(loginUser.username,backendUser.await().username)
+            assertEquals(loginUser.username, backendUser.await().username)
         }
 
     @Test
     @Throws(Exception::class)
-    fun networkApi_addChat_Success()=
+    fun networkApi_addChat_Success() =
         runTest {
             firebaseApi.createNewChat(
-                members = listOf("mrug@123.com","happy@123.com"),
+                members = listOf("mrug@123.com", "happy@123.com"),
                 chatName = "h1235",
-                chatId = "12345",
+                chatId = "123456",
                 profilePhoto = "test",
-            isGroup = false
+                isGroup = false
             )
         }
+
+    @Test
+    @Throws(Exception::class)
+    fun networkApi_getChatData_Success() =
+        runTest {
+            val chatId = "14772768"
+            val chatData: Deferred<Chats> = async {
+                firebaseApi.getChatData(chatId)
+            }
+            assertEquals(chatId, chatData.await().chatId)
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun dataRepo_getDataChat_Success() =
+        runTest {
+            val chatId = "14772768"
+            val username = "good@456.com"
+
+            val currChat: Deferred<Chats> = async {
+                dataRepository.getDataChat(chatId, username)
+            }
+
+            assertEquals(chatId, currChat.await().chatId)
+            assertEquals(username, currChat.await().chatName)
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun networkApi_sendMessage_Success() =
+        runTest {
+            val chatId = "14772767"
+            val username = "good@456.com"
+            val message = MessageReceived(
+                content = "New Test message",
+                contentType = ContentType.text,
+                senderId = username,
+            )
+
+            val status: Deferred<Boolean> =
+                async { firebaseApi.sendNewMessage(message, chatId) }
+            delay(3000)
+            assertEquals(true, status.await())
+
+
+        }
+
+    @Test
+    @Throws(Exception::class)
+    fun networkApi_getMessage_Success() =
+        runTest {
+            val chatId = "14772768"
+            val username = "good@456.com"
+            val message = MessageReceived(
+                content = "New Test message",
+                contentType = ContentType.text,
+                senderId = username,
+            )
+            try {
+                val messages: Deferred<List<MessageReceived>> =
+                    async { firebaseApi.getMessagesForChat(currentChatId = chatId) }
+                delay(3000)
+                assertNotNull(messages.await())
+                Log.d("testing", "messages : ${messages.await()}")
+                assertTrue(true)
+            } catch (e: Exception) {
+                assertTrue(false)
+            }
+        }
+    @Test
+    @Throws(Exception::class)
+    fun dataRepo_sendMessage_Success() =
+        runTest {
+            val chatId = "14772768"
+            val username = "good@456.com"
+            val message = MessageReceived(
+                content = "New Test message",
+                contentType = ContentType.text,
+                senderId = username,
+            )
+
+            val status: Deferred<Boolean> =
+                async { dataRepository.sendMessage(message, chatId) }
+            delay(3000)
+            assertEquals(true, status.await())
+        }
+
 }

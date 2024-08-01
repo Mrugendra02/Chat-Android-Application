@@ -67,7 +67,8 @@ fun UserChats(
     viewModel: ChatsViewModel = viewModel(factory = GodViewModelProvider.Factory),
 //    viewModel: ChatsViewModel,
     navitageToAddChats: (List<String>) -> Unit,
-    navigateToWelcome:()->Unit
+    navigateToWelcome:()->Unit,
+    navigateToCurrentChat: (String) -> Unit
 ) {
 
 
@@ -76,7 +77,7 @@ fun UserChats(
         CurrentChatStatus.Success -> {
             UserChatsBody(
                 chatsUiState = chatsUiState,
-                navigateToCurrentChat = {},
+                navigateToCurrentChat = navigateToCurrentChat,
                 isCardEnabled = true,
                 navigateToAddChats = { navitageToAddChats(viewModel.getMembers()) },
                 logOut = { viewModel.logoutUser() }
@@ -321,12 +322,12 @@ fun SingleChat(
             .height(120.dp)
             .padding(5.dp),
         onClick = {
-            navigateToCurrentChat(chat.chatId)
+            navigateToCurrentChat("${chat.chatId},${chat.chatName}")
 
         },
         enabled = isCardEnabled
         //        border = BorderStroke(5.dp,MaterialTheme.colorScheme.primary)
-        //        onClick = currentChat(chat.chatId)
+
     )
     {
         Row(

@@ -26,7 +26,7 @@ interface DataRepository {
 
     suspend fun getCurrentUser(): User
 
-    suspend fun logoutUser(currUser: User):Boolean
+    suspend fun logoutUser(currUser: User): Boolean
 
     suspend fun resetDataPassword(username: String, newPassword: String, uniqueId: String): Boolean
 
@@ -43,7 +43,7 @@ interface DataRepository {
 
     suspend fun getChats(myUsername: String): List<Chats>
 
-    suspend fun sendMessage(message: MessageReceived)
+    suspend fun sendMessage(message: MessageReceived, chatId: String)
 
     suspend fun sendNotificationToToken(token: String, title: String, content: String)
 
@@ -52,6 +52,8 @@ interface DataRepository {
     suspend fun getMyMessages(currentChatId: String): List<MessageReceived>
 
     suspend fun deleteChat(chatId: String)
+
+    suspend fun getDataChat(chatId: String, chatName: String): Chats
 }
 
 class NetworkDataRepository(
@@ -276,7 +278,9 @@ class NetworkDataRepository(
                                 val info = async { apiService.getUserChatData(mem) }
                                 info.await()
                             }
-                            if (memInfo.username!=""){ t.membersData.add(memInfo) }
+                        if (memInfo.username != "") {
+                            t.membersData.add(memInfo)
+                        }
                     }
                 }
                 if (t.isGroup == false) {
@@ -286,9 +290,12 @@ class NetworkDataRepository(
                 }
             }
                 .filter {
-                it.membersData.size == (it.members.size-1)
-            }
-            Log.d(TAG, "Chats are : ${myChats.map { it.membersData.size }} == ${myChats.map { it.members.size }}")
+                    it.membersData.size == (it.members.size - 1)
+                }
+            Log.d(
+                TAG,
+                "Chats are : ${myChats.map { it.membersData.size }} == ${myChats.map { it.members.size }}"
+            )
 
             return myChats
         } catch (e: Exception) {
@@ -297,12 +304,19 @@ class NetworkDataRepository(
         }
     }
 
-    override suspend fun sendMessage(message: MessageReceived) {
+    override suspend fun sendMessage(message: MessageReceived, chatId: String) {
         try {
-            Log.d(TAG, "send successfully from data")
-            apiService.sendNewMessage(message)
+            val staus =
+            apiService.sendNewMessage(message, chatId = chatId)
+
+            if(!staus){
+                throw Exception("Unable to send message")
+            }
+            Log.d(TAG, "send successfully from data ")
+//            return status
         } catch (e: Exception) {
-            Log.d(TAG, "unabe to send to database from data")
+            Log.e(TAG, "unabe to send message to database from data")
+//            return false
             throw e
         }
     }
@@ -317,16 +331,7 @@ class NetworkDataRepository(
         }
     }
 
-//    override suspend fun getTokenForMemebers(
-//        members: List<String>,
-//        currentFcmToken: String
-//    ): List<String> {
-//        val tokenList = coroutineScope {
-//            val tokens = async { apiService.getTokenForMemebers(members) }
-//            tokens.await()
-//        }
-//        return tokenList - currentFcmToken
-//    }
+//
 
     override suspend fun getMyMessages(currentChatId: String): List<MessageReceived> {
         val messages = coroutineScope {
@@ -341,6 +346,46 @@ class NetworkDataRepository(
             apiService.deleteChat(chatId)
         } catch (e: Exception) {
             Log.d(TAG, "Error in data delete chatId: $chatId : $e")
+        }
+    }
+
+    override suspend fun getDataChat(chatId: String, chatName: String): Chats {
+        try {
+            val chatData = coroutineScope {
+                val cD = async { apiService.getChatData(chatId) }
+                cD.await()
+            }
+            if (chatData.isGroup) {
+                for (members in chatData.members) {
+                    val userInfo = coroutineScope {
+                        val info = async { apiService.getUserChatData(members) }
+                        info.await()
+                    }
+                    chatData.membersData.add(userInfo)
+                }
+                Log.d(TAG, "Chat data is : $chatData")
+                return chatData
+            } else {
+                var tempChatName = ""
+                for (members in chatData.members) {
+                    if (members == chatName) {
+                        val userInfo = coroutineScope {
+                            val info = async { apiService.getUserChatData(members) }
+                            info.await()
+                        }
+                        chatData.membersData.add(userInfo)
+                        tempChatName = userInfo.username
+                    }
+                }
+                Log.d(TAG, "Chat data is : $chatData")
+                return chatData.copy(chatName = tempChatName)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to get the chat data : $e")
+            return Chats(
+                chatName = "",
+                chatPic = e.message.toString()
+            )
         }
     }
 }

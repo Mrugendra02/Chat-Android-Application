@@ -123,9 +123,12 @@ class FirebaseAuthenticationApi(
     override fun logoutUser(
         errorCallBack: (String) -> Unit
     ) {
-        try{ auth.signOut() }
+        try{
+            auth.signOut()
+            Log.d(TAGauth,"Logout Success")
+        }
         catch (e:Exception){
-            Log.d(TAGauth,"Logout failed : $e")
+            Log.e(TAGauth,"Logout failed : $e")
             errorCallBack("Logout Failed : $e")
         }
     }
