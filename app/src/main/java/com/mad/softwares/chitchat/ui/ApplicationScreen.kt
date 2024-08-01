@@ -162,16 +162,21 @@ fun ApplicationScreen(
 fun ApptopBar(
     destinationData: destinationData,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    title:String ="",
     navigateUp: () -> Unit,
     action: @Composable (RowScope.() -> Unit) ={},
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = stringResource(id = destinationData.title),
+            if(title==""){
+                Text(
+                    text = stringResource(id = destinationData.title),
 //                color = MaterialTheme.colorScheme.onPrimary
-            )
+                )
+            }else{
+                Text(text = title)
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
@@ -215,7 +220,8 @@ fun ApptopBarPreview() {
         ApptopBar(
             welcomeDestinationTest,
             scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
-            navigateUp = {}
+            navigateUp = {},
+            title = "Testing this"
         )
     }
 }

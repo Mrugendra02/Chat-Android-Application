@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
@@ -56,11 +57,17 @@ class MainActivity : ComponentActivity() {
                 ChitChatTheme(
                     dynamicColor = false
                 ) {
-                    ApplicationScreen(
-                        navController = rememberNavController(),
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = chatsScreenDestination.routeWithReload
+                        color = MaterialTheme.colorScheme.background
                     )
+                    {
+                        ApplicationScreen(
+                            navController = rememberNavController(),
+                            modifier = Modifier.fillMaxSize(),
+                            startDestination = chatsScreenDestination.routeWithReload
+                        )
+                    }
                 }
             }
         } else {
@@ -68,11 +75,16 @@ class MainActivity : ComponentActivity() {
                 ChitChatTheme(
                     dynamicColor = false
                 ) {
-                    ApplicationScreen(
-                        navController = rememberNavController(),
+                    Surface(
                         modifier = Modifier.fillMaxSize(),
-                        startDestination = welcomeDestination.route
-                    )
+                        color = MaterialTheme.colorScheme.background
+                    ){
+                        ApplicationScreen(
+                            navController = rememberNavController(),
+                            modifier = Modifier.fillMaxSize(),
+                            startDestination = welcomeDestination.route
+                        )
+                    }
                 }
             }
         }

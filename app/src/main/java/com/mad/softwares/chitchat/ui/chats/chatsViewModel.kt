@@ -125,6 +125,7 @@ class ChatsViewModel(
                 val userChats =
                     async { dataRepository.getChats(chatsUiState.value.currentUser.username) }
 //            chats.await()
+//                if (userChats.await().get(0).chatId == "")
                 chatsUiState.update {
                     it.copy(
                         chats = userChats.await(),

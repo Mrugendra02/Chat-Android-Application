@@ -334,11 +334,26 @@ class NetworkDataRepository(
 //
 
     override suspend fun getMyMessages(currentChatId: String): List<MessageReceived> {
-        val messages = coroutineScope {
-            val mess = async { apiService.getMessagesForChat(currentChatId) }
-            mess.await()
+        try{
+            val messages = coroutineScope {
+                val mess = async { apiService.getMessagesForChat(currentChatId) }
+                mess.await()
+            }
+            return messages.sortedBy { t -> t.timeStamp }
         }
-        return messages.sortedBy { t -> t.timeStamp }
+        catch (e:Exception){
+            Log.e(TAG,"Unable to get the messages : $e")
+//            throw e
+            return listOf(
+                MessageReceived(
+                    contentType = ContentType.text,
+                    content = e.message.toString(),
+                    senderId = "ErrorSerious",
+                    status = messageStatus.Error
+                )
+            )
+        }
+
     }
 
     override suspend fun deleteChat(chatId: String) {

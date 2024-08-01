@@ -516,13 +516,13 @@ class NetworkFirebaseApi(
 
         Log.d(TAG,"message getting started in api")
         val messageGet = chatsCollection.document(currentChatId).collection("Messages")
-            .get()
+            .get(Source.SERVER)
             .addOnSuccessListener {
                 Log.d(TAG,"message got successfully")
             }
             .addOnFailureListener{e->
                 Log.e(TAG,"Failed to get Messages : $e")
-                throw e
+                return@addOnFailureListener
             }
 
         for( doc in messageGet.await()) {

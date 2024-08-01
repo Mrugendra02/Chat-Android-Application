@@ -138,7 +138,7 @@ class MessagesViewModel(
 //        )
         backgroundScope.launch()  {
             Log.d(TAGmess, "Sending message")
-            delay(5000)
+//            delay(5000)
             try {
 
                 dataRepository.sendMessage(
@@ -161,10 +161,15 @@ class MessagesViewModel(
 
             } catch (e: Exception) {
                 Log.e(TAGmess, "Unable to send the message : $e")
-                messagesUiState.value.messages.set(
-                    index = messagesUiState.value.messages.indexOf(newMessage),
-                    element = newMessage.copy(status = messageStatus.Error)
-                )
+                try{
+                    messagesUiState.value.messages.set(
+                        index = messagesUiState.value.messages.indexOf(newMessage),
+                        element = newMessage.copy(status = messageStatus.Error)
+                    )
+                }
+                catch (e:Exception){
+                    Log.e(TAGmess,"Unable to update the message status : $e")
+                }
 //                    Log.e(TAGmess,"Unable to send the message")
 //                throw Exception("Unable to send the message : ${status.await()}")
                 messagesUiState.update {
@@ -194,6 +199,14 @@ class MessagesViewModel(
                     dataRepository.getMyMessages(
                         currentChatId = messagesUiState.value.chatID
                     )
+                }
+                if(messages.await().get(0).senderId == "ErrorSerious"){
+//                    messagesUiState.update {
+//                        it.copy(
+//                            messageScreen = MessageScreen.Error,
+//                            isError = true,
+//                            errorMessage = messages.await().get(0).content)}
+                    throw Exception(messages.await().get(0).content)
                 }
                 messagesUiState.update {
                     it.copy(

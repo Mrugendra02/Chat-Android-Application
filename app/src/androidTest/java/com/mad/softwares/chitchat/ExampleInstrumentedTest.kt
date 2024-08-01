@@ -348,7 +348,7 @@ class ExampleInstrumentedTest {
                 senderId = username,
             )
 
-            val status: Deferred<Boolean> =
+            val status: Deferred<Unit> =
                 async { dataRepository.sendMessage(message, chatId) }
             delay(3000)
             assertEquals(true, status.await())

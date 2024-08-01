@@ -35,4 +35,5 @@
     <string name="not_account_found">No Account found for the application</string>
     <string name="add_chats">Select Contact</string>
     <string name="error_message">Error Getting your chats and I am not implementing this screen. Just press below button to refresh.</string>
+    <string name="start_chating_now">Start chating now !!!</string>
 </resources>

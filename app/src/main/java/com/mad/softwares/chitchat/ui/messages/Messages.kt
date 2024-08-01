@@ -14,18 +14,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowOutward
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -42,6 +44,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +62,7 @@ import com.mad.softwares.chitchat.ui.theme.ChitChatTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 
-object messagesdestinationData : destinationData{
+object messagesdestinationData : destinationData {
     override val route = "Messages"
     val chatIDAndUsername = "chatID,username"
     override val title = R.string.chats
@@ -80,17 +83,20 @@ fun Messages(
         }
 
         MessageScreen.Error -> {
-            MessagesBodyError(
-                uiState = uiState
-            )
+            ShowMessageError {
+                viewModel.getMessages(isForced = true)
+            }
         }
+
         MessageScreen.Success -> {
 
             MessagesBodySuccess(
                 uiState = uiState,
                 updateMessage = { viewModel.messageEdit(it) },
+                getMessagesAgain = { viewModel.getMessages(isForced = true) },
                 sendMessage = { viewModel.sendTextMessage() },
-                navigateUp = navigateUp)
+                navigateUp = navigateUp
+            )
         }
     }
 }
@@ -100,33 +106,75 @@ fun Messages(
 fun MessagesBodySuccess(
     uiState: MessagesUiState,
     updateMessage: (String) -> Unit,
+    getMessagesAgain:()->Unit,
     sendMessage: () -> Unit,
-    navigateUp:()->Unit,
+    navigateUp: () -> Unit,
     modifier: Modifier = Modifier
-){
+) {
     Scaffold(
-        topBar = { ApptopBar(destinationData = messagesdestinationData, navigateUp = navigateUp)},
-        bottomBar = { BottomMessageSend(appUistate = uiState, sendMessage = sendMessage, updateMessage = updateMessage) },
+        topBar = {
+            ApptopBar(
+                destinationData = messagesdestinationData,
+                navigateUp = navigateUp,
+                title = uiState.chatName,
+                action = {
+                    IconButton(onClick = { getMessagesAgain() }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "refresh"
+                        )}
+                }
+            )
+        },
+        bottomBar = {
+            BottomMessageSend(
+                appUistate = uiState,
+                sendMessage = sendMessage,
+                updateMessage = updateMessage
+            )
+        },
+
         modifier = modifier
+            .background(MaterialTheme.colorScheme.background)
     ) { padding ->
-        LazyColumn(
-            modifier = modifier
-                .padding(padding)
-                .background(MaterialTheme.colorScheme.background),
-            reverseLayout = true
-        ) {
-            items(uiState.messages.reversed()){
-                if(it.senderId == uiState.chatName){
-                    ReceiverChat(message = it)
-                }else{
-                    SenderChat(message = it)
+        if (uiState.messages.isNotEmpty()) {
+            LazyColumn (
+                modifier = modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+//                    .background(MaterialTheme.colorScheme.background),
+                reverseLayout = true,
+                verticalArrangement = Arrangement.Bottom
+            ){
+                items(uiState.messages.reversed()) {
+                    if (it.senderId == uiState.chatName) {
+                        ReceiverChat(message = it)
+                    } else {
+                        SenderChat(message = it)
+                    }
                 }
             }
-
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
+//                    .background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier= Modifier
+                        .fillMaxWidth(),
+                    text = stringResource(R.string.start_chating_now),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
     }
 }
+
 @Composable
 fun MessagesBodyError(
     uiState: MessagesUiState
@@ -135,28 +183,28 @@ fun MessagesBodyError(
 }
 
 @Composable
-fun MessageBodyLoading(){
+fun MessageBodyLoading() {
     Text(text = "Loading")
 }
 
 @Composable
 fun SenderChat(
     message: MessageReceived
-){
+) {
     val date = message.timeStamp.toDate()
 //    val sdf  = SimpleDateFormat("HH:mm")
     val currentDate = Timestamp.now().toDate()
-    val difference = (currentDate.time - date.time)/(1000*60*60)
-    val sdf = if(difference<=24){
+    val difference = (currentDate.time - date.time) / (1000 * 60 * 60)
+    val sdf = if (difference <= 24) {
         SimpleDateFormat("hh:mm a")
-    }else{
+    } else {
         SimpleDateFormat("YYYY/MM/dd hh:mm a")
     }
     val fDate = sdf.format(date)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-    ){
+    ) {
         Spacer(modifier = Modifier.weight(1f))
         Card(
             modifier = Modifier
@@ -164,7 +212,7 @@ fun SenderChat(
                 .weight(5f)
                 .padding(vertical = 10.dp, horizontal = 5.dp),
 //                .height(60.dp),
-            shape = RoundedCornerShape(20.dp,0.dp,20.dp,20.dp),
+            shape = RoundedCornerShape(20.dp, 0.dp, 20.dp, 20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             )
@@ -174,13 +222,14 @@ fun SenderChat(
                 text = message.content,
                 modifier = Modifier
                     .padding(10.dp),
-                fontSize = 20.sp)
-            Card{
+                fontSize = 20.sp
+            )
+            Card {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
-                ){
+                ) {
                     Text(
                         modifier = Modifier
 //                            .fillMaxWidth()
@@ -191,19 +240,17 @@ fun SenderChat(
 //                text = message.timeStamp.toDate().toString(),
                         textAlign = TextAlign.Start
                     )
-                    if(message.status == messageStatus.Send){
+                    if (message.status == messageStatus.Send) {
                         Icon(
                             imageVector = Icons.Default.ArrowOutward,
                             contentDescription = null
                         )
-                    }
-                    else if(message.status == messageStatus.Sending){
+                    } else if (message.status == messageStatus.Sending) {
                         Icon(
                             imageVector = Icons.Default.CloudQueue,
                             contentDescription = null
                         )
-                    }
-                    else if(message.status == messageStatus.Error){
+                    } else if (message.status == messageStatus.Error) {
                         Icon(
                             imageVector = Icons.Default.Error,
                             contentDescription = null
@@ -220,28 +267,28 @@ fun SenderChat(
 @Composable
 fun ReceiverChat(
     message: MessageReceived
-){
+) {
     val date = message.timeStamp.toDate()
 //    val sdf  = SimpleDateFormat("HH:mm")
     val currentDate = Timestamp.now().toDate()
-    val difference = (currentDate.time - date.time)/(1000*60*60)
-    val sdf = if(difference<=24){
+    val difference = (currentDate.time - date.time) / (1000 * 60 * 60)
+    val sdf = if (difference <= 24) {
         SimpleDateFormat("hh:mm a")
-    }else{
+    } else {
         SimpleDateFormat("YYYY/MM/dd hh:mm a")
     }
     val fDate = sdf.format(date)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-    ){
+    ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(5f)
                 .padding(vertical = 10.dp, horizontal = 5.dp),
 //                .height(60.dp),
-            shape = RoundedCornerShape(0.dp,20.dp,20.dp,20.dp),
+            shape = RoundedCornerShape(0.dp, 20.dp, 20.dp, 20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer
             )
@@ -249,10 +296,10 @@ fun ReceiverChat(
             Text(
                 text = message.content,
                 modifier = Modifier
-                    .padding(10.dp)
-                ,
-                fontSize = 20.sp)
-            Card{
+                    .padding(10.dp),
+                fontSize = 20.sp
+            )
+            Card {
                 Text(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -274,8 +321,8 @@ fun ReceiverChat(
 fun BottomMessageSend(
     appUistate: MessagesUiState,
     sendMessage: () -> Unit,
-    updateMessage:(String)->Unit,
-){
+    updateMessage: (String) -> Unit,
+) {
 
     ElevatedCard(
         Modifier
@@ -288,13 +335,12 @@ fun BottomMessageSend(
 
 //            )
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-        ,
+            .background(MaterialTheme.colorScheme.background),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface,
 
             )
-    ){
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -319,15 +365,14 @@ fun BottomMessageSend(
                                 dampingRatio = Spring.DampingRatioNoBouncy,
                                 stiffness = Spring.StiffnessLow,
                             )
-                        )
-                    ,
+                        ),
 
 //                    .padding(end = 80.dp),
                     value = appUistate.messageToSend,
 //                    value = appUistate.messageToSend,
 //                    onValueChange = { updateMessage(it) },
 //                    value = "",
-                    onValueChange = {updateMessage(it)},
+                    onValueChange = { updateMessage(it) },
                     textStyle = TextStyle.Default.copy(
                         fontSize = 20.sp,
 
@@ -336,9 +381,9 @@ fun BottomMessageSend(
                     placeholder = { Text(text = "Message...") },
 //                    placeholder = {"message..."},
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0,0,0,alpha = 0),
-                        unfocusedBorderColor = Color(0,0,0,alpha = 0),
-                        disabledBorderColor = Color(0,0,0,alpha = 0)
+                        focusedBorderColor = Color(0, 0, 0, alpha = 0),
+                        unfocusedBorderColor = Color(0, 0, 0, alpha = 0),
+                        disabledBorderColor = Color(0, 0, 0, alpha = 0)
                     )
 //                trailingIcon =
 //                {
@@ -397,78 +442,79 @@ fun BottomMessageSend(
 
 @Preview
 @Composable
-fun PreviewMessagebodySuccess(){
-    ChitChatTheme (
+fun PreviewMessagebodySuccess() {
+    ChitChatTheme(
         dynamicColor = false,
         darkTheme = true
-    ){
+    ) {
         MessagesBodySuccess(
             uiState = MessagesUiState(
                 chatName = "ThereSelf",
                 messages = mutableListOf(
-                    MessageReceived(
-                        content = "Hello Friend",
-                        senderId = "mySelf",
-                        timeStamp = Timestamp(Date(2024-1900,1,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Hey there",
-                        senderId = "ThereSelf",
-                        timeStamp = Timestamp(Date(2024-1900,1,25,20,17))
-                    ),
-                    MessageReceived(
-                        content = "good to say",
-                        senderId = "mySelf",
-                        timeStamp = Timestamp(Date(2024-1900,2,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Ok Bye",
-                        senderId = "ThereSelf",
-                        timeStamp = Timestamp(Date(2024-1900,2,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Hello Friend",
-                        senderId = "mySelf",
-                        timeStamp = Timestamp(Date(2024-1900,1,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Hey there",
-                        senderId = "ThereSelf",
-                        timeStamp = Timestamp(Date(2024-1900,1,25,20,17))
-                    ),
-                    MessageReceived(
-                        content = "good to say",
-                        senderId = "mySelf",
-                        timeStamp = Timestamp(Date(2024-1900,2,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Ok Bye",
-                        senderId = "ThereSelf",
-                        timeStamp = Timestamp(Date(2024-1900,2,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Hello Friend",
-                        senderId = "mySelf",
-                        timeStamp = Timestamp(Date(2024-1900,1,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Hey there",
-                        senderId = "ThereSelf",
-                        timeStamp = Timestamp(Date(2024-1900,1,25,20,17))
-                    ),
-                    MessageReceived(
-                        content = "good to say",
-                        senderId = "mySelf",
-                        timeStamp = Timestamp(Date(2024-1900,2,25,20,15))
-                    ),
-                    MessageReceived(
-                        content = "Ok Bye",
-                        senderId = "ThereSelf",
-                        timeStamp = Timestamp(Date(2024-1900,2,25,20,15))
-                    ),
-            ),
+//                    MessageReceived(
+//                        content = "Hello Friend",
+//                        senderId = "mySelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Hey there",
+//                        senderId = "ThereSelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 17))
+//                    ),
+//                    MessageReceived(
+//                        content = "good to say",
+//                        senderId = "mySelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 2, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Ok Bye",
+//                        senderId = "ThereSelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 2, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Hello Friend",
+//                        senderId = "mySelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Hey there",
+//                        senderId = "ThereSelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 17))
+//                    ),
+//                    MessageReceived(
+//                        content = "good to say",
+//                        senderId = "mySelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 2, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Ok Bye",
+//                        senderId = "ThereSelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 2, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Hello Friend",
+//                        senderId = "mySelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Hey there",
+//                        senderId = "ThereSelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 17))
+//                    ),
+//                    MessageReceived(
+//                        content = "good to say",
+//                        senderId = "mySelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 2, 25, 20, 15))
+//                    ),
+//                    MessageReceived(
+//                        content = "Ok Bye",
+//                        senderId = "ThereSelf",
+//                        timeStamp = Timestamp(Date(2024 - 1900, 2, 25, 20, 15))
+//                    ),
+                ),
             ),
             updateMessage = {},
+            getMessagesAgain = {  },
             sendMessage = {},
             navigateUp = {}
         )
@@ -477,26 +523,30 @@ fun PreviewMessagebodySuccess(){
 
 @Preview(backgroundColor = 0xFFFFFFFF)
 @Composable
-fun PreviewSenderChat(){
-    ChitChatTheme (
+fun PreviewSenderChat() {
+    ChitChatTheme(
         dynamicColor = false,
         darkTheme = true
-    ){
-        SenderChat(message = MessageReceived(
-            content = "Hello Friend "
-        ))
+    ) {
+        SenderChat(
+            message = MessageReceived(
+                content = "Hello Friend "
+            )
+        )
     }
 }
 
 @Preview
 @Composable
-fun PreviewReceiverChat(){
-    ChitChatTheme (
+fun PreviewReceiverChat() {
+    ChitChatTheme(
         dynamicColor = false
-    ){
-        ReceiverChat(message = MessageReceived(
-            content = "Hello Friend \nThis is your friend",
-            timeStamp = Timestamp(Date(2024-1900,1,25,20,15))
-        ))
+    ) {
+        ReceiverChat(
+            message = MessageReceived(
+                content = "Hello Friend \nThis is your friend",
+                timeStamp = Timestamp(Date(2024 - 1900, 1, 25, 20, 15))
+            )
+        )
     }
 }
